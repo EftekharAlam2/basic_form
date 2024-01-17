@@ -151,20 +151,43 @@
 
   <script>
     $(document).ready(function() {
-      $(".next").click(function() {
-        var currentStep = $(this).closest('.step');
-        currentStep.hide().next().show();
-      });
+  $(".next").click(function() {
+    var currentStep = $(this).closest('.step');
+    currentStep.hide().next().show();
+  });
 
-      $(".prev").click(function() {
-        var currentStep = $(this).closest('.step');
-        currentStep.hide().prev().show();
-      });
+  $(".prev").click(function() {
+    var currentStep = $(this).closest('.step');
+    currentStep.hide().prev().show();
+  });
 
-      $("#myForm").submit(function() {
-        
-      });
+  $("#myForm").submit(function(e) {
+    e.preventDefault(); 
+
+    var formData = new FormData($(this)[0]);
+
+    $.ajax({
+      type: $(this).attr('method'),
+      url: $(this).attr('action'),
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function(response) {
+        $('#myForm')[0].reset();
+
+        alert('CV submitted successfully!');
+
+        $('.step').hide();
+        $('#step-1').show();
+      },
+      error: function(error) {
+        console.log(error);
+        alert('Error submitting CV. Please try again.');
+      }
     });
+  });
+});
+
   </script>
 </body>
 </html>

@@ -1,5 +1,4 @@
 <?php
-// Retrieve form data
 $fullName = $_POST['fullName'];
 $email = $_POST['email'];
 $phoneNumber = $_POST['phoneNumber'];
@@ -41,7 +40,6 @@ $sql = "INSERT INTO cv (full_name, email, phone_number, address, profile_picture
 
 if ($conn->query($sql) === TRUE) {
     echo "Form data inserted successfully!";
-    header("Location: form.php");
 } else {
     echo "Error: " . $sql . "<br>" . $conn->error;
 }
