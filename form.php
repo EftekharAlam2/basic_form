@@ -58,14 +58,6 @@
                 </div>
 
                 <div class="form-group">
-                <label for="profilePicture">Profile Picture:</label>
-                <div class="custom-file">
-                    <input type="file" id="profilePicture" name="profilePicture" class="custom-file-input" accept="image/*">
-                    <label class="custom-file-label" for="profilePicture">Choose file</label>
-                </div>
-                </div>
-
-                <div class="form-group">
                 <label for="dob">Date of Birth:</label>
                 <input type="date" id="dob" name="dob" class="form-control" required>
                 </div>
@@ -127,11 +119,6 @@
                 </div>
 
                 <div class="form-group">
-                <label for="employmentDates">Dates of Employment:</label>
-                <input type="text" id="employmentDates" name="employmentDates" class="form-control" placeholder="e.g., MM/YYYY - MM/YYYY" required>
-                </div>
-
-                <div class="form-group">
                 <label for="responsibilitiesAchievements">Responsibilities and Achievements:</label>
                 <textarea id="responsibilitiesAchievements" name="responsibilitiesAchievements" class="form-control" required></textarea>
                 </div>
@@ -149,45 +136,145 @@
   </form>
 </div>
 
-  <script>
+<script>
     $(document).ready(function() {
-  $(".next").click(function() {
-    var currentStep = $(this).closest('.step');
-    currentStep.hide().next().show();
+        $('.custom-file-input').on('change', function() {
+            var fileName = $(this).val().split('\\').pop();
+            $(this).next('.custom-file-label').html(fileName);
+        });
+
+      $(".next").click(function() {
+        var currentStep = $(this).closest('.step');
+        if (validateStep(currentStep)) {
+          currentStep.hide().next().show();
+        }
+      });
+
+      $(".prev").click(function() {
+        var currentStep = $(this).closest('.step');
+        currentStep.hide().prev().show();
+      });
+
+      $("#myForm").submit(function(e) {
+        e.preventDefault();
+
+        if (validateForm()) {
+          var formData = new FormData($(this)[0]);
+
+          $.ajax({
+            type: $(this).attr('method'),
+            url: $(this).attr('action'),
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+              $('#myForm')[0].reset();
+
+              alert('CV submitted successfully!');
+
+              $('.step').hide();
+              $('#step-1').show();
+            },
+            error: function(error) {
+              console.log(error);
+              alert('Error submitting CV. Please try again.');
+            }
+          });
+        }
+      });
+
+    //   function validateStep(step) {
+    //     var valid = true;
+
+    //     step.find(".form-control").each(function() {
+    //       if ($(this).prop('required') && $(this).val() === '') {
+    //         alert('Please fill in all required fields.');
+    //         valid = false;
+    //         return false;
+    //       }
+    //     });
+
+    //     return valid;
+    //   }
+    function validateStep(step) {
+  var valid = true;
+
+  step.find(".form-control").each(function() {
+    var input = $(this);
+    var value = input.val().trim();
+
+    if (input.prop('required') && value === '') {
+      alert('Please fill in all required fields.');
+      valid = false;
+      return false;
+    }
+
+    if (input.attr('name') === 'fullName') {
+      if (!/^[a-zA-Z ]+$/.test(value)) {
+        alert('Invalid name format: ' + value);
+        valid = false;
+        return false;
+      }
+    }
+
+    if (input.attr('name') === 'phoneNumber') {
+      if (!/^\d+$/.test(value)) {
+        alert('Invalid phone number format. Please enter only numeric characters.');
+        valid = false;
+        return false;
+      }
+
+      if (value.length > 12) {
+        alert('Phone number cannot be more than 12 digits.');
+        valid = false;
+        return false;
+      }
+    }
+
+    if (input.attr('name') === 'email') {
+      if (!/^[^0-9]*[a-zA-Z0-9._-]*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})$/.test(value)) {
+        alert('Invalid email format: ' + value);
+        valid = false;
+        return false;
+      }
+      // Add existing email check if needed
+    }
+
+    if (input.attr('name') === 'dob') {
+      var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(value)) {
+        alert('Invalid Date of Birth format: ' + value);
+        valid = false;
+        return false;
+      }
+
+      var dateTime = new Date(value);
+      if (isNaN(dateTime.getTime())) {
+        alert('Invalid Date of Birth format: ' + value);
+        valid = false;
+        return false;
+      }
+    }
+
   });
 
-  $(".prev").click(function() {
-    var currentStep = $(this).closest('.step');
-    currentStep.hide().prev().show();
-  });
+  return valid;
+}
 
-  $("#myForm").submit(function(e) {
-    e.preventDefault(); 
 
-    var formData = new FormData($(this)[0]);
+      function validateForm() {
+        var valid = true;
 
-    $.ajax({
-      type: $(this).attr('method'),
-      url: $(this).attr('action'),
-      data: formData,
-      contentType: false,
-      processData: false,
-      success: function(response) {
-        $('#myForm')[0].reset();
+        $(".step").each(function() {
+          if (!validateStep($(this))) {
+            valid = false;
+            return false;
+          }
+        });
 
-        alert('CV submitted successfully!');
-
-        $('.step').hide();
-        $('#step-1').show();
-      },
-      error: function(error) {
-        console.log(error);
-        alert('Error submitting CV. Please try again.');
+        return valid;
       }
     });
-  });
-});
-
   </script>
 </body>
 </html>
