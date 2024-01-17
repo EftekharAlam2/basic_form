@@ -93,8 +93,18 @@
                 </div>
 
                 <div class="form-group">
-                <label for="cgpa">CGPA:</label>
-                <input type="text" id="cgpa" name="cgpa" class="form-control" required>
+                    <label for="cgpa">CGPA:</label>
+                    <div>
+                        <button type="button" class="btn btn-secondary cgpa-btn" data-value="lower">Lower than 3.00</button>
+                        <button type="button" class="btn btn-secondary cgpa-btn" data-value="3.00-3.49">3.00-3.49</button>
+                        <button type="button" class="btn btn-secondary cgpa-btn" data-value="higher">Higher than 3.5</button>
+                    </div>
+                    <div class="cgpa-inputs" style="display: none;">
+                        <!-- <input type="text" id="cgpa" name="cgpa" class="form-control mt-2 cgpa" placeholder="Enter the reason for the result" required> -->
+                        <select id="cgpaSelect" name="cgpaSelect" class="form-control mt-2 cgpaSelect">
+                            
+                        </select>
+                    </div>
                 </div>
 
                 <button type="button" class="btn btn-secondary float-left prev">Previous</button>
@@ -138,9 +148,39 @@
 
 <script>
     $(document).ready(function() {
-        $('.custom-file-input').on('change', function() {
-            var fileName = $(this).val().split('\\').pop();
-            $(this).next('.custom-file-label').html(fileName);
+
+      $(".cgpa-btn").click(function () {
+            var value = $(this).data("value");
+            $(".cgpa-inputs").hide();
+            
+            if (value === "lower" ) {
+                $("#cgpa").parent().show();
+                $("#cgpaSelect").hide();
+            } else if (value === "higher") {
+              $("#cgpa").hide();
+              $("#cgpaSelect").show();
+                $.ajax({
+                    type: "GET",
+                    url: "getSkills.php", 
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.success) {
+                            var select = $("#cgpaSelect");
+                            select.empty();
+                            $.each(response.skills, function (index, skill) {
+                                select.append($("<option>").text(skill).val(skill));
+                            });
+                            select.parent().show();
+                        } else {
+                            alert('Failed to retrieve skills data.');
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        alert('Error retrieving skills data.');
+                    }
+                });
+            }
         });
 
       $(".next").click(function() {
@@ -161,43 +201,42 @@
         if (validateForm()) {
           var formData = new FormData($(this)[0]);
 
-          $.ajax({
+        //   var cgpaValue = $(".cgpa-btn.active").data("value");
+
+        // if (cgpaValue === "lower" || cgpaValue === "3.00-3.49") {
+        //     // For "lower" or "3.00-3.49", send data from the input field
+        //     formData.append('cgpa', $("#cgpa").val());
+        // } else if (cgpaValue === "higher") {
+        //     // For "higher", send data from the select field
+        //     formData.append('cgpa', $("#cgpaSelect").val());
+        // }
+
+        formData.append('cgpa', $("#cgpaSelect").val());
+
+        $.ajax({
             type: $(this).attr('method'),
             url: $(this).attr('action'),
             data: formData,
             contentType: false,
             processData: false,
             success: function(response) {
-              $('#myForm')[0].reset();
+                $('#myForm')[0].reset();
 
-              alert('CV submitted successfully!');
+                alert('CV submitted successfully!');
 
-              $('.step').hide();
-              $('#step-1').show();
+                $('.step').hide();
+                $('#step-1').show();
             },
             error: function(error) {
-              console.log(error);
-              alert('Error submitting CV. Please try again.');
+                console.log(error);
+                alert('Error submitting CV. Please try again.');
             }
-          });
+        });
         }
       });
 
-    //   function validateStep(step) {
-    //     var valid = true;
-
-    //     step.find(".form-control").each(function() {
-    //       if ($(this).prop('required') && $(this).val() === '') {
-    //         alert('Please fill in all required fields.');
-    //         valid = false;
-    //         return false;
-    //       }
-    //     });
-
-    //     return valid;
-    //   }
     function validateStep(step) {
-  var valid = true;
+   var valid = true;
 
   step.find(".form-control").each(function() {
     var input = $(this);
