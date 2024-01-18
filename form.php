@@ -9,6 +9,7 @@
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js"></script>
   <style>
     .step {
       max-width: 600px;
@@ -65,10 +66,12 @@
                 <div class="form-group">
                 <label for="coutry">Country:</label>
                 <!-- <input type="text" id="nationality" name="nationality" class="form-control" required> -->
-                <select id="countrySelect" name="country" class="form-control mt-2" onchange="fetchCities()">
+                <!-- <select id="countrySelect" name="country" class="form-control mt-2" onchange="fetchCities()">
                             
-                </select>
+                </select> -->
+                <input type="text" id="countryInput" class="form-control mt-2" placeholder="">
                 </div>
+                <div id="matchingCountries" class="mt-2"></div>
 
                 <button type="button" class="btn btn-primary float-right next">Next</button>
             </div>
@@ -193,19 +196,18 @@
             dataType: "json",
             success: function (response) {
                 if (response.success) {
-                    var select = $("#countrySelect");
+                    // var select = $("#countrySelect");
+                    var inputField = $("#countryInput"); 
                     select.empty();
-                    // $.each(response.country, function (index, country_name) {
-                    //     select.append($("<option>").text(country_name).val(country_name));
-                    // });
-                    var uniqueCountries = {};
+                    // var uniqueCountries = {};
 
-                    $.each(response.country, function (index, country_name) {
-                        if (!uniqueCountries[country_name]) {
-                            select.append($("<option>").text(country_name).val(country_name));
-                            uniqueCountries[country_name] = true;
-                        }
-                    });
+                    // $.each(response.country, function (index, country_name) {
+                    //     if (!uniqueCountries[country_name]) {
+                    //         select.append($("<option>").text(country_name).val(country_name));
+                    //         uniqueCountries[country_name] = true;
+                    //     }
+                    // })
+                   
                 } else {
                     alert('Failed to retrieve country data.');
                 }
@@ -215,6 +217,93 @@
                 alert('Error retrieving country data.');
             }
         });
+
+        var inputField = $("#countryInput");
+    var matchingCountriesDiv = $("#matchingCountries");
+
+    inputField.on("input", function() {
+        var inputText = $(this).val();
+
+        if (inputText.length >= 3) {
+            $.ajax({
+                type: "GET",
+                url: "getMatchingCountries.php",
+                dataType: "json",
+                data: { inputText: inputText },
+                success: function(response) {
+                    if (response.success) {
+                        displayMatchingCountries(response.matchingCountries);
+                    } else {
+                        alert('Failed to retrieve matching countries data.');
+                        clearInputField();
+                    }
+                },
+                error: function(error) {
+                    console.log(error);
+                    alert('Error retrieving matching countries data.');
+                    clearInputField();
+                }
+            });
+        } else {
+            matchingCountriesDiv.empty(); // Clear matching countries if input length is less than 3
+        }
+    });
+
+    function displayMatchingCountries(matchingCountries) {
+        matchingCountriesDiv.empty();
+
+        if (matchingCountries.length > 0) {
+            var ul = $("<ul>").addClass("list-group");
+            $.each(matchingCountries, function(index, country) {
+                ul.append($("<li>").addClass("list-group-item").text(country));
+            });
+            matchingCountriesDiv.append(ul);
+        } else {
+            matchingCountriesDiv.text("No matching countries found.");
+            clearInputField();
+        }
+    }
+
+    function clearInputField() {
+        inputField.val("");
+    }
+
+    //     $("#countryInput").on("input", function() {
+    //     var inputText = $(this).val();
+
+    //     $.ajax({
+    //         type: "GET",
+    //         url: "getMatchingCountries.php", 
+    //         dataType: "json",
+    //         data: { inputText: inputText },
+    //         success: function(response) {
+    //             if (response.success) {
+    //                 displayMatchingCountries(response.matchingCountries);
+    //             } else {
+    //                 alert('Failed to retrieve matching countries data.');
+    //             }
+    //         },
+    //         error: function(error) {
+    //             console.log(error);
+    //             alert('Error retrieving matching countries data.');
+    //         }
+    //     });
+    // });
+
+    // function displayMatchingCountries(matchingCountries) {
+    //     var matchingCountriesDiv = $("#matchingCountries");
+    //     matchingCountriesDiv.empty();
+
+    //     if (matchingCountries.length > 0) {
+    //         var ul = $("<ul>").addClass("list-group");
+    //         $.each(matchingCountries, function(index, country) {
+    //             ul.append($("<li>").addClass("list-group-item").text(country));
+    //         });
+    //         matchingCountriesDiv.append(ul);
+    //     } else {
+    //         matchingCountriesDiv.text("No matching countries found.");
+    //     }
+    // }
 
         function fetchCities() {
             var selectedCountry = $("#countrySelect").val();
