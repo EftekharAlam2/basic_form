@@ -63,9 +63,9 @@
                 </div>
 
                 <div class="form-group">
-                <label for="nationality">Country:</label>
+                <label for="coutry">Country:</label>
                 <!-- <input type="text" id="nationality" name="nationality" class="form-control" required> -->
-                <select id="countrySelect" name="countrySelect" class="form-control mt-2">
+                <select id="countrySelect" name="country" class="form-control mt-2" onchange="fetchCities()">
                             
                 </select>
                 </div>
@@ -91,9 +91,9 @@
                 </div>
 
                 <div class="form-group">
-                <label for="location">City:</label>
+                <label for="city">City:</label>
                 <!-- <input type="text" id="location" name="location" class="form-control" required> -->
-                <select id="citySelect" name="citySelect" class="form-control mt-2">
+                <select id="citySelect" name="city" class="form-control mt-2">
                             
                 </select>
                 </div>
@@ -154,7 +154,6 @@
 
 <script>
     $(document).ready(function() {
-
       $(".cgpa-btn").click(function () {
             var value = $(this).data("value");
             $(".cgpa-inputs").hide();
@@ -217,25 +216,35 @@
             }
         });
 
-        $.ajax({
-            type: "GET",
-            url: "getCountry.php", 
-            dataType: "json",
-            success: function (response) {
-                if (response.success) {
-                    var select = $("#citySelect");
-                    select.empty();
-                    $.each(response.city, function (index, city_name) {
-                        select.append($("<option>").text(city_name).val(city_name));
-                    });
-                } else {
-                    alert('Failed to retrieve city data.');
+        function fetchCities() {
+            var selectedCountry = $("#countrySelect").val();
+
+            $.ajax({
+                type: "GET",
+                url: "getCity.php",
+                dataType: "json",
+                data: { country: selectedCountry }, // Pass the selected country to the server
+                success: function (response) {
+                    if (response.success) {
+                        var select = $("#citySelect");
+                        select.empty();
+                        $.each(response.city, function (index, city_name) {
+                            select.append($("<option>").text(city_name).val(city_name));
+                        });
+                    } else {
+                        alert('Failed to retrieve city data.');
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    alert('Error retrieving city data.');
                 }
-            },
-            error: function (error) {
-                console.log(error);
-                alert('Error retrieving country data.');
-            }
+            });
+        }
+
+        $("#countrySelect").change(function () {
+        var selectedCountry = $(this).val();
+        fetchCities(selectedCountry);
         });
 
 
@@ -268,6 +277,8 @@
         // }
 
         formData.append('cgpa', $("#cgpaSelect").val());
+        formData.append('country', $("#countrySelect").val());
+        formData.append('city', $("#citySelect").val());
 
         $.ajax({
             type: $(this).attr('method'),

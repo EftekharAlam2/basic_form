@@ -4,12 +4,12 @@ $email = $_POST['email'];
 $phoneNumber = $_POST['phoneNumber'];
 $address = $_POST['address'];
 $dob = $_POST['dob'];
-$nationality = $_POST['nationality'];
+$nationality = $_POST['country'];
 
 $degreeEarned = $_POST['degreeEarned'];
 $fieldOfStudy = $_POST['fieldOfStudy'];
 $instituteName = $_POST['instituteName'];
-$locationEducation = $_POST['location'];
+$locationEducation = $_POST['city'];
 $cgpa = $_POST['cgpa'];
 
 $jobTitle = $_POST['jobTitle'];
