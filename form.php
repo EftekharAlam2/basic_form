@@ -63,8 +63,11 @@
                 </div>
 
                 <div class="form-group">
-                <label for="nationality">Nationality:</label>
-                <input type="text" id="nationality" name="nationality" class="form-control" required>
+                <label for="nationality">Country:</label>
+                <!-- <input type="text" id="nationality" name="nationality" class="form-control" required> -->
+                <select id="countrySelect" name="countrySelect" class="form-control mt-2">
+                            
+                </select>
                 </div>
 
                 <button type="button" class="btn btn-primary float-right next">Next</button>
@@ -88,8 +91,11 @@
                 </div>
 
                 <div class="form-group">
-                <label for="location">Location:</label>
-                <input type="text" id="location" name="location" class="form-control" required>
+                <label for="location">City:</label>
+                <!-- <input type="text" id="location" name="location" class="form-control" required> -->
+                <select id="citySelect" name="citySelect" class="form-control mt-2">
+                            
+                </select>
                 </div>
 
                 <div class="form-group">
@@ -182,6 +188,56 @@
                 });
             }
         });
+        $.ajax({
+            type: "GET",
+            url: "getCountry.php", 
+            dataType: "json",
+            success: function (response) {
+                if (response.success) {
+                    var select = $("#countrySelect");
+                    select.empty();
+                    // $.each(response.country, function (index, country_name) {
+                    //     select.append($("<option>").text(country_name).val(country_name));
+                    // });
+                    var uniqueCountries = {};
+
+                    $.each(response.country, function (index, country_name) {
+                        if (!uniqueCountries[country_name]) {
+                            select.append($("<option>").text(country_name).val(country_name));
+                            uniqueCountries[country_name] = true;
+                        }
+                    });
+                } else {
+                    alert('Failed to retrieve country data.');
+                }
+            },
+            error: function (error) {
+                console.log(error);
+                alert('Error retrieving country data.');
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: "getCountry.php", 
+            dataType: "json",
+            success: function (response) {
+                if (response.success) {
+                    var select = $("#citySelect");
+                    select.empty();
+                    $.each(response.city, function (index, city_name) {
+                        select.append($("<option>").text(city_name).val(city_name));
+                    });
+                } else {
+                    alert('Failed to retrieve city data.');
+                }
+            },
+            error: function (error) {
+                console.log(error);
+                alert('Error retrieving country data.');
+            }
+        });
+
 
       $(".next").click(function() {
         var currentStep = $(this).closest('.step');
